@@ -17,3 +17,7 @@ Run `make install`
 To build for your local machine, run `make build`
 
 To build for a linux (amd 64) machine, run `make build-linux` (uses docker)
+
+## Usage
+
+First, configure your discord `TOKEN` environment variable. Then simply run `./dist/zodbot`.
