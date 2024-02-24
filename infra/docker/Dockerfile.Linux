@@ -1,0 +1,35 @@
+FROM python:3.12
+
+ENV PYTHONFAULTHANDLER=1 \
+  PYTHONUNBUFFERED=1 \
+  PYTHONHASHSEED=random \
+  PIP_NO_CACHE_DIR=off \
+  PIP_DISABLE_PIP_VERSION_CHECK=on \
+  PIP_DEFAULT_TIMEOUT=100 \
+  # Poetry's configuration:
+  POETRY_NO_INTERACTION=1 \
+  POETRY_VIRTUALENVS_CREATE=false \
+  POETRY_CACHE_DIR='/var/cache/pypoetry' \
+  POETRY_HOME='/usr/local' \
+  POETRY_VERSION=1.7.1
+  # ^^^
+  # Make sure to update it!
+
+# Install poetry
+RUN pip install poetry
+
+WORKDIR /app
+
+# Copy files to the container
+COPY ./zodbot/ /app/zodbot
+COPY ./pyproject.toml /app
+COPY ./poetry.lock /app
+
+# Install deps
+RUN poetry config virtualenvs.create false
+RUN poetry install --no-root
+
+# CMD ls -al
+
+# Build the app
+RUN poetry run build

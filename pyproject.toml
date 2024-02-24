@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "zodbot"
+version = "0.1.0"
+description = ""
+authors = ["Aaron"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "<3.13,>=3.8"
+discord = "^2.3.2"
+requests = "^2.31.0"
+pyinstaller = "^6.4.0"
+
+[tool.poetry.scripts]
+build = "zodbot.pyinstaller:install"
+
+[tool.poetry.group.dev.dependencies]
+types-requests = "^2.31.0.20240218"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

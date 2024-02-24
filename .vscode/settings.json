@@ -1,0 +1,4 @@
+{
+    "mypy-type-checker.args": ["--check-untyped-defs", "--warn-unused-ignores"],
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+}

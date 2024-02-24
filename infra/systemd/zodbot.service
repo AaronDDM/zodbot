@@ -1,0 +1,14 @@
+[Unit]
+Description=ZodBot
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=ubuntu
+ExecStart=/usr/bin/env /home/ubuntu/zodbot/zodbot_linux
+
+[Install]
+WantedBy=multi-user.target
