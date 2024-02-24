@@ -39,18 +39,6 @@ async def on_message(message):
     else:
       await message.channel.send("No stock found")
 
-  elif message.content.startswith('!hi'):
-    present = datetime.datetime.now()
-    future = datetime.datetime(2021, 6, 9, 0, 0, 0)
-    difference = future - present
-    await message.channel.send('Hi {}'.format(message.author.mention))
-
-  elif message.content.startswith('!loki'):
-    present = datetime.datetime.now()
-    future = datetime.datetime(2021, 6, 9, 0, 0, 0)
-    difference = future - present
-    await message.channel.send('In {} days'.format(str(difference.days)))
-
 token = os.getenv('TOKEN')
 
 if token is None:
