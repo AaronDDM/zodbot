@@ -1,4 +1,5 @@
 .venv/
+.mypy_cache/
 dist/
 build/
 __pycache__
