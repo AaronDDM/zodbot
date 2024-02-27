@@ -12,9 +12,7 @@ ENV PYTHONFAULTHANDLER=1 \
   POETRY_CACHE_DIR='/var/cache/pypoetry' \
   POETRY_HOME='/usr/local' \
   POETRY_VERSION=1.7.1
-  # ^^^
-  # Make sure to update it!
-
+  
 # Install poetry
 RUN pip install poetry
 
