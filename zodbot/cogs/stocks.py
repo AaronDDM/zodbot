@@ -70,17 +70,6 @@ class Stocks(commands.Cog):
             return None
         
         # Convert to dict
-        # "01. symbol": "NET",
-        # "02. open": "100.0000",
-        # "03. high": "101.6600",
-        # "04. low": "97.1400",
-        # "05. price": "98.4500",
-        # "06. volume": "2945929",
-        # "07. latest trading day": "2024-02-23",
-        # "08. previous close": "99.4700",
-        # "09. change": "-1.0200",
-        # "10. change percent": "-1.0254%"
-        
         return {
             "symbol": symbol,
             "price": float(response["c"]),
@@ -117,18 +106,5 @@ class Stocks(commands.Cog):
 
             embed.set_author(name="{}".format(stock_info["name"]), icon_url="{}".format(stock_info["logo"]))
 
-            # embed.set_footer(text="Latest trading day {}".format(stock_price_info["latest_trading_day"]))
-
             await message.channel.send(embed=embed)
             
-
-
-    @commands.command()
-    async def stock(self, ctx: commands.Context, *, member: discord.Member | None = None):
-        """Says hello"""
-        user = member or ctx.author
-        if self._last_user is None or self._last_user.id != user.id:
-            await ctx.send(f'Hello {user.name}~')
-        else:
-            await ctx.send(f'Hello {user.name}... This feels familiar.')
-        self._last_user = user
