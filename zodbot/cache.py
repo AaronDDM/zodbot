@@ -1,5 +1,6 @@
-import os
+import dataclasses
 import json
+import os
 import time
 
 class Cache():
@@ -35,5 +36,10 @@ class Cache():
         return None
 
     def set(self, key, value):
-        self.cache[key] = {'value': value, 'time': time.time()}
+        if dataclasses.is_dataclass(value):
+            v = dataclasses.asdict(value)
+        else:
+            v = value
+
+        self.cache[key] = {'value': v, 'time': time.time()}
         self.save_cache()

@@ -1,10 +1,14 @@
-import discord
-import requests
-import os
 import tempfile
-from zodbot.cache import Cache
+from dataclasses import dataclass
 from datetime import datetime
-from discord.ext import commands 
+
+import discord
+from discord.ext import commands
+from zodbot import utils
+
+from zodbot.cache import Cache
+from zodbot.client import finhub
+
 
 class Stocks(commands.Cog):
     def __init__(self, bot):
@@ -14,40 +18,14 @@ class Stocks(commands.Cog):
 
     async def get_stock_info(self, symbol: str):
         # Check if the stock information is in the cache
-        stock_info = self._cache.get(symbol)
-        if stock_info is not None:
-            return stock_info
+        cache_info_dict = self._cache.get(symbol)
+        if cache_info_dict is not None:
+            return finhub.StockInfo.from_dict(cache_info_dict)
         
         # If the stock information is not in the cache, make a request to the API
-        request = requests.get("https://finnhub.io/api/v1/stock/profile2?symbol={}".format(symbol), headers={"X-Finnhub-Token": os.getenv('FINNHUB_API_KEY')})
-
-        # Check if the request was successful
-        if request.status_code != 200:
-            print(request.status_code, request.text)
+        stock_info = await finhub.get(finhub.StockInfo, "https://finnhub.io/api/v1/stock/profile2?symbol={}".format(symbol)) 
+        if stock_info is None:
             return None
-        
-        # Parse the response
-        response = request.json()
-
-        # If the response does not contain the stock information
-        if "country" not in response:
-            return None
-        
-        # Convert to dict
-        stock_info = {
-            "country": response["country"],
-            "currency": response["currency"],
-            "exchange": response["exchange"],
-            "ipo": response["ipo"],
-            "marketCapitalization": response["marketCapitalization"],
-            "name": response["name"],
-            "phone": response["phone"],
-            "shareOutstanding": response["shareOutstanding"],
-            "ticker": response["ticker"],
-            "weburl": response["weburl"],
-            "logo": response["logo"],
-            "finnhubIndustry": response["finnhubIndustry"],
-        }
 
         # Save the stock information in the cache
         self._cache.set(symbol, stock_info)
@@ -55,29 +33,10 @@ class Stocks(commands.Cog):
         return stock_info
 
     async def get_daily_price_info(self, symbol: str):
-        request = requests.get("https://finnhub.io/api/v1/quote?symbol={}".format(symbol), headers={"X-Finnhub-Token": os.getenv('FINNHUB_API_KEY')})
+        stock_price = await finhub.get(finhub.StockQuote, "https://finnhub.io/api/v1/quote?symbol={}".format(symbol))
 
-        # Check if the request was successful
-        if request.status_code != 200:
-            print(request.status_code, request.text)
-            return None
-    
-        # Parse the response
-        response = request.json()
-
-        # Check if the response contains the stock information
-        if "d" not in response:
-            return None
-        
         # Convert to dict
-        return {
-            "symbol": symbol,
-            "price": float(response["c"]),
-            "change": float(response["d"]),
-            # Remove the % sign and convert to float
-            "change_percent":  float(response["dp"]),
-            "volume": int(response["t"]),
-        }
+        return stock_price
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -95,16 +54,21 @@ class Stocks(commands.Cog):
                 await message.channel.send("No stock price found")
                 return
             
+            stock_basic_financials = await finhub.get(finhub.StockBasicFinancials, "https://finnhub.io/api/v1/stock/metric?symbol={}".format(stock_symbol))
+            if stock_basic_financials is None:
+                await message.channel.send("No stock basic financials found")
+                return
+
             # Get the color based on the change
-            color = discord.Color.red() if stock_price_info["change"] < 0 else discord.Color.green()
+            color = discord.Color.red() if stock_price_info.change < 0 else discord.Color.green()
 
             # Create the embed
-            embed = discord.Embed(title="{}% at ${}".format(stock_price_info["change_percent"], stock_price_info["price"]),
-                      description="**Symbol**: {}\n**Volume**: {}".format(stock_price_info["symbol"], stock_price_info["volume"]),
+            embed = discord.Embed(title="${} {} {}%".format(stock_price_info.current_price, 'up' if stock_price_info.change_percent > 0 else 'down', round(stock_price_info.change_percent, 3)),
+                      description="**Symbol**: {}\n**Market Cap**: {}".format(stock_symbol, utils.human_format(stock_info.market_capitalization)),
                       colour=color,
                       timestamp=datetime.now())
 
-            embed.set_author(name="{}".format(stock_info["name"]), icon_url="{}".format(stock_info["logo"]))
+            embed.set_author(name="{}".format(stock_info.name))
 
             await message.channel.send(embed=embed)
             
