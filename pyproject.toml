@@ -10,6 +10,8 @@ python = "<3.13,>=3.8"
 discord = "^2.3.2"
 requests = "^2.31.0"
 pyinstaller = "^6.4.0"
+firebase-admin = "^6.4.0"
+python-dotenv = "^1.0.1"
 
 [tool.poetry.scripts]
 build = "zodbot.pyinstaller:install"

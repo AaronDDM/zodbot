@@ -18,6 +18,16 @@ To build for your local machine, run `make build`
 
 To build for a linux (amd 64) machine, run `make build-linux` (uses docker)
 
+## Environment variables
+
+`DISCORD_TOKEN`: Discord bot token.
+
+`FINNHUB_API_KEY`: The API KEY for your FinHub account.
+
+`FIREBASE_SERVICE_ACCOUNT_KEY`: Path to your firebase service account crendtials.
+
 ## Usage
 
-First, configure your discord `TOKEN` environment variable. Then simply run `./dist/zodbot`.
+Running for development, run: `poetry run python3 zodbot/main.py`
+
+Running for production, run: `./dist/zodbot`

@@ -16,6 +16,23 @@ class StockInfo:
     weburl: str
     logo: str
     finnhub_industry: str
+    
+    @classmethod
+    def asdict(cls, data) -> dict:
+        return {
+            "country": data.country,
+            "currency": data.currency,
+            "exchange": data.exchange,
+            "ipo": data.ipo,
+            "marketCapitalization": data.market_capitalization,
+            "name": data.name,
+            "phone": data.phone,
+            "shareOutstanding": data.share_outstanding,
+            "ticker": data.ticker,
+            "weburl": data.weburl,
+            "logo": data.logo,
+            "finnhubIndustry": data.finnhub_industry,
+        }
 
     @classmethod
     def from_dict(cls, data) -> Self:

@@ -11,6 +11,17 @@ class StockMetric:
     beta: float
 
     @classmethod
+    def asdict(cls, data) -> dict:
+        return {
+            "10DayAverageTradingVolume": data.ten_day_average_trading_volume,
+            "52WeekHigh": data.fifty_two_week_high,
+            "52WeekLow": data.fifty_two_week_low,
+            "52WeekLowDate": data.fifty_two_week_low_date,
+            "52WeekPriceReturnDaily": data.fifty_two_week_price_return_daily,
+            "beta": data.beta
+        }
+
+    @classmethod
     def from_dict(cls, data) -> Self:
         return cls(
             ten_day_average_trading_volume=data["10DayAverageTradingVolume"],
@@ -27,6 +38,14 @@ class StockBasicFinancials:
     metric: StockMetric
     metric_type: str
     symbol: str
+
+    @classmethod
+    def asdict(cls, data) -> dict:
+        return {
+            "metric": StockMetric.asdict(data.metric),
+            "metricType": data.metric_type,
+            "symbol": data.symbol
+        }
 
     @classmethod
     def from_dict(cls, data) -> Self:

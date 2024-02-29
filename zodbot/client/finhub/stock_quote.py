@@ -13,6 +13,18 @@ class StockQuote:
     previous_close: float
 
     @classmethod
+    def asdict(cls, data) -> dict:
+        return {
+            "c": data.current_price,
+            "d": data.change,
+            "dp": data.change_percent,
+            "h": data.high,
+            "l": data.low,
+            "o": data.open,
+            "pc": data.previous_close,
+        }
+
+    @classmethod
     def from_dict(cls, data) -> Self:
         return cls(
             current_price=data.get("c"),

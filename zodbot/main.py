@@ -1,7 +1,7 @@
 import discord
-import os
 from zodbot.cogs import stocks
 from discord.ext import commands 
+from zodbot.config import config
 
 intents = discord.Intents.default()
 intents.members = True
@@ -18,9 +18,7 @@ async def on_ready():
   await bot.add_cog(stocks.Stocks(bot))
 
 
-token = os.getenv('TOKEN')
-
-if token is None:
+if config.discord_token is None:
   print("Token is not set")
 else:
-  bot.run(token)
+  bot.run(config.discord_token)

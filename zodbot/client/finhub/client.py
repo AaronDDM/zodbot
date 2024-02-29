@@ -5,11 +5,18 @@ from typing import Dict, Generic, Optional, Protocol, Self, Type, TypeVar, cast
 
 import requests
 
+from zodbot.config import config
+
 
 class ResponseDataAbstract(Protocol):
     @classmethod
     @abstractmethod
     def from_dict(cls, data: Dict) -> Self:
+        pass
+
+    @classmethod
+    @abstractmethod
+    def asdict(cls, self) -> Dict:
         pass
 
 T = TypeVar('T', bound=ResponseDataAbstract)
@@ -19,7 +26,7 @@ class ResponseData(Generic[T]):
     
 async def get(cls: Type[T], url: str) -> Optional[T]:
     # Make the request
-    request = requests.get(url, headers={"X-Finnhub-Token": os.getenv('FINNHUB_API_KEY')})
+    request = requests.get(url, headers={"X-Finnhub-Token": config.finnhub_token})
 
     # Check if the request was successful
     if request.status_code != 200:
@@ -31,7 +38,7 @@ async def get(cls: Type[T], url: str) -> Optional[T]:
 
     return cls.from_dict(data=response_dict)
 
-async def post(type_: type[T], url: str, body: dict | None = None) -> Optional[T]:
+async def post(cls: type[T], url: str, body: dict | None = None) -> Optional[T]:
     # Make the request
     request = requests.post(url, data=body, headers={"X-Finnhub-Token": os.getenv('FINNHUB_API_KEY')})
 
@@ -43,4 +50,4 @@ async def post(type_: type[T], url: str, body: dict | None = None) -> Optional[T
     # Parse the response
     response_dict = request.json()
 
-    return cast(T, type_.from_dict(data=response_dict))
+    return cls.from_dict(data=response_dict)
