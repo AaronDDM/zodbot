@@ -8,13 +8,15 @@ from zodbot import utils
 
 from zodbot.cache import Cache
 from zodbot.client import finhub
-from zodbot.firestore import db
-
+from zodbot.db import db
 
 class Stocks(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._cache = Cache(tempfile.gettempdir() + "/cache", "stocks-v2.json", 60)
+
+        if not db.check_if_db_exists():
+            db.create_table()
 
     async def get_stock_info(self, symbol: str):
         # Check if the stock information is in the cache
@@ -57,31 +59,12 @@ class Stocks(commands.Cog):
             return
 
         # Check if the user already has stocks in the database
-        user_stocks = db.collection("stocks").document(str(ctx.author.id)).get()
+        if db.get_user_stock(ctx.author.id, symbol):
+            await ctx.send("You already have this stock in your portfolio")
+            return
 
-        if user_stocks.exists:
-            user_stocks = user_stocks.to_dict()
-            
-            # Only add the stock if the user doesn't already have it
-            if symbol in user_stocks:
-                return
-            
-            # Add the stock to the user's stocks
-            user_stocks[symbol] = {
-                "shares": shares,
-                "purchase_price": purchase_price,
-            }
-        else:
-            user_stocks = {}
-
-            # Add the stock to the user's stocks
-            user_stocks[symbol] = {
-                "shares": shares,
-                "purchase_price": purchase_price
-            }
-
-        # Update the user's stocks in the database
-        db.collection("stocks").document(str(ctx.author.id)).set(user_stocks)
+        # Add the stock to the user's stocks
+        db.add_transaction(ctx.author.id, symbol, 'BUY', shares, purchase_price)
 
         await ctx.send("Added stock to your portfolio")
     
@@ -89,12 +72,10 @@ class Stocks(commands.Cog):
     async def portfolio(self, ctx: commands.Context, *, member: discord.Member | None = None):
         user = member or ctx.author
 
-        user_stocks = db.collection("stocks").document(str(user.id)).get()
-        if not user_stocks.exists:
+        user_stocks = db.get_user_portfolio(user.id)
+        if not user_stocks:
             await ctx.send("No stocks found for this user")
             return
-
-        user_stocks = user_stocks.to_dict()
 
         # Create the embed
         embed = discord.Embed(title="Stocks for {}".format(user.name),
@@ -103,16 +84,13 @@ class Stocks(commands.Cog):
                               timestamp=datetime.now())
 
         for stock in user_stocks:
-            stock_info = await self.get_stock_info(stock)
+            stock_info = await self.get_stock_info(stock.symbol)
             if stock_info is None:
                 continue
 
-            stock_price_info = await self.get_daily_price_info(stock, cache=True)
+            stock_price_info = await self.get_daily_price_info(stock.symbol, cache=True)
             if stock_price_info is None:
                 continue
-
-            # Get the color based on the change
-            color = discord.Color.red() if stock_price_info.change < 0 else discord.Color.green()
 
             # Add the stock to the embed
             embed.add_field(
@@ -122,9 +100,9 @@ class Stocks(commands.Cog):
                     Shares: {}\n
                     Total value: ${}
                     """.format(
-                        str(user_stocks[stock]["purchase_price"]).format("0.2f"),
-                        user_stocks[stock]["shares"], 
-                        str(stock_price_info.current_price * user_stocks[stock]["shares"]).format("0.2f")
+                        str(stock.weighted_average).format("0.2f"),
+                        stock.shares, 
+                        str(stock.value).format("0.2f")
                     ),
                 inline=False
             )
@@ -165,36 +143,3 @@ class Stocks(commands.Cog):
             embed.set_author(name="{}".format(stock_info.name))
 
             await message.channel.send(embed=embed)
-
-            # We're now gonna store this stock in the database for this user.
-            # The stock will be stored in a collection called "stocks" and the document will be the user's ID.
-            # We'll assume that the user purchases 100 shares of the stock at the current price. 
-            # This will be re-balanced every time the user adds new stocks or sells stocks, such that
-            # shares are always equally weighted for the user.
-            
-            # Check if the user already has stocks in the database
-            user_stocks = db.collection("stocks").document(str(message.author.id)).get()
-
-            if user_stocks.exists:
-                user_stocks = user_stocks.to_dict()
-                
-                # Only add the stock if the user doesn't already have it
-                if stock_symbol in user_stocks:
-                    return
-                
-                # Add the stock to the user's stocks
-                user_stocks[stock_symbol] = {
-                    "shares": 100,
-                    "purchase_price": stock_price_info.current_price,
-                }
-            else:
-                user_stocks = {}
-
-                # Add the stock to the user's stocks
-                user_stocks[stock_symbol] = {
-                    "shares": 100,
-                    "purchase_price": stock_price_info.current_price
-                }
-
-            # Update the user's stocks in the database
-            db.collection("stocks").document(str(message.author.id)).set(user_stocks)

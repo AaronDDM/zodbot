@@ -16,3 +16,6 @@ build-linux:
 	docker create --name zodbox_linux zodbox_linux
 	docker cp zodbox_linux:/app/dist/zodbot ./dist/zodbox_linux
 	docker rm -f zodbox_linux
+
+test:
+	poetry run python -m unittest discover --verbose

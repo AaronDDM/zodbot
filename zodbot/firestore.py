@@ -9,6 +9,9 @@ service_account_key_path = os.path.abspath(config.firebase_service_account_key)
 if not os.path.exists(service_account_key_path):
     raise FileNotFoundError(f"Service account key not found at {service_account_key_path}")
 
+# Print the path to the service account key
+print(f"Service account key found at {service_account_key_path}")
+
 # Use a service account.
 cred = credentials.Certificate(service_account_key_path)
 
