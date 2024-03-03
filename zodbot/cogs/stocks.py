@@ -44,7 +44,7 @@ class Stocks(commands.Cog):
         stock_price = await finhub.get(finhub.StockQuote, "https://finnhub.io/api/v1/quote?symbol={}".format(symbol))
         return stock_price
     
-    @commands.command()
+    @commands.hybrid_command()
     async def add(self, ctx: commands.Context, symbol: str, shares: int, purchase_price: float):
         # Check if the stock information is in the cache
         stock_info = await self.get_stock_info(symbol)
@@ -68,7 +68,7 @@ class Stocks(commands.Cog):
 
         await ctx.send("Added stock to your portfolio")
     
-    @commands.command()
+    @commands.hybrid_command()
     async def portfolio(self, ctx: commands.Context, *, member: discord.Member | None = None):
         user = member or ctx.author
 
