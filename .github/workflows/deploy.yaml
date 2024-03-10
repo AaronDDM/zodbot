@@ -45,8 +45,8 @@ jobs:
             SSH_KEY_PATH: ${{ github.workspace }}/../private.key
       - name: Deploy
         run: |
-            scp -i $SSH_KEY_PATH -r ./dist/* ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}:${{secrets.SSH_PATH}}
-            ssh ubuntu@vps-555c353f.vps.ovh.ca 'cd ${{secrets.SSH_PATH}} && mv zodbox_linux_uploaded zodbox_linux && sudo systemctl restart zodbot'
+            scp -i $SSH_KEY_PATH -r ./dist/zodbot ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}:${{secrets.SSH_PATH}}/zodbox_linux_uploaded
+            ssh -i $SSH_KEY_PATH ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} 'cd ${{secrets.SSH_PATH}} && mv zodbox_linux_uploaded zodbox_linux && sudo systemctl restart zodbot'
         env:
             SSH_USER: ${{secrets.SSH_USER}}
             SSH_HOST: ${{secrets.SSH_HOST}}
