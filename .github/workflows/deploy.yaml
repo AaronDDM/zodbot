@@ -28,7 +28,7 @@ jobs:
       - name: Deploy
         run: |
             scp -i $SSH_KEY_PATH -r ./dist/* ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}:${{secrets.SSH_PATH}}
-            ssh ubuntu@vps-555c353f.vps.ovh.ca 'cd ${{secrets.SSH_PATH}} && mv zodbox_linux_uploaded zodbox_linux && systemctl restart zodbot'
+            ssh ubuntu@vps-555c353f.vps.ovh.ca 'cd ${{secrets.SSH_PATH}} && mv zodbox_linux_uploaded zodbox_linux && sudo systemctl restart zodbot'
         env:
             SSH_USER: ${{secrets.SSH_USER}}
             SSH_HOST: ${{secrets.SSH_HOST}}
