@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from typing import Self
+from .client import ResponseDataAbstract
 
 @dataclass
-class StockMetric:
+class StockMetric(ResponseDataAbstract):
     ten_day_average_trading_volume: float
     fifty_two_week_high: float
     fifty_two_week_low: float
@@ -33,16 +34,16 @@ class StockMetric:
 
 
 @dataclass
-class StockBasicFinancials:
+class StockBasicFinancials(ResponseDataAbstract):
     metric: StockMetric
     metric_type: str
     symbol: str
 
-    def asdict(cls, data) -> dict:
+    def asdict(cls) -> dict:
         return {
-            "metric": data.metric.asdict(),
-            "metricType": data.metric_type,
-            "symbol": data.symbol
+            "metric": cls.metric.asdict(),
+            "metricType": cls.metric_type,
+            "symbol": cls.symbol
         }
 
     @classmethod

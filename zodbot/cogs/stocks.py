@@ -21,7 +21,7 @@ class Stocks(commands.Cog):
             db.create_table()
 
 
-    async def get_stock_info(self, symbol: str):
+    async def get_stock_info(self, symbol: str) -> finhub.StockInfo | None:
         # Check if the stock information is in the cache
         cache_info_dict = self._cache.get(symbol)
         if cache_info_dict is not None:
@@ -37,7 +37,7 @@ class Stocks(commands.Cog):
 
         return stock_info
 
-    async def get_daily_price_info(self, symbol: str, cache: bool = False):
+    async def get_daily_price_info(self, symbol: str, cache: bool = False) -> finhub.StockQuote | None:
         # Check if the stock price information is in the cache
         if cache:
             cache_price_dict = self._cache.get(symbol + "-price")
@@ -47,30 +47,30 @@ class Stocks(commands.Cog):
         stock_price = await finhub.get(finhub.StockQuote, "https://finnhub.io/api/v1/quote?symbol={}".format(symbol))
         return stock_price
     
-    async def buy(self, user_id: int, symbol: str, shares: int, purchase_price: float):
+    async def buy(self, user_id: int, symbol: str, shares: int, purchase_price: float) -> tuple[str | None, str | None]:
         # Check if the user already has this stock in the database
         if db.get_user_stock(user_id, symbol):
-            return False, "You already have this stock in your portfolio"
+            return None, "You already have this stock in your portfolio"
 
         # Check if the stock information is in the cache
         stock_info = await self.get_stock_info(symbol)
         if stock_info is None:
-            return False, "No stock found"
+            return None, "No stock found"
 
         # Check if the stock price information is in the cache
         stock_price_info = await self.get_daily_price_info(symbol, cache=True)
         if stock_price_info is None:
-            return False, "No stock price found"
+            return None, "No stock price found"
 
         # Add the stock to the user's stocks
         db.add_transaction(user_id, symbol, 'BUY', shares, purchase_price)
 
-        return True, "Added stock to your portfolio"
+        return "Added stock to your portfolio", None
 
-    async def portfolio(self, user: discord.Member | discord.User):
+    async def portfolio(self, user: discord.Member | discord.User) -> tuple[discord.Embed | None, str | None]:
         user_stocks = db.get_user_portfolio(user.id)
         if not user_stocks:
-            return False, "No stocks found for this user"
+            return None, "No stocks found for this user"
 
         # Create the embed
         embed = discord.Embed(title="Stocks for {}".format(user.name),
@@ -102,21 +102,26 @@ class Stocks(commands.Cog):
                 inline=False
             )
 
-        return True, embed
+        return embed, None
 
     @commands.command(name="buy")
     async def buy_command(self, ctx: commands.Context, symbol: str, shares: int, purchase_price: float):
-        success, message = await self.buy(ctx.author.id, symbol, shares, purchase_price)
-        await ctx.send(message)
+        message, error = await self.buy(ctx.author.id, symbol, shares, purchase_price)
+        if error:
+            await ctx.send(error)
+        else:
+            await ctx.send(message)
     
     @commands.command(name="portfolio")
     async def portfolio_command(self, ctx: commands.Context, *, member: discord.Member | None = None):
         user = member or ctx.author
-        success, response = await self.portfolio(user)
-        if success:
-            await ctx.send(embed=response)
+        embed, error = await self.portfolio(user)
+        if error:
+            await ctx.send(error)
+        elif embed:
+            await ctx.send(embed=embed)
         else:
-            await ctx.send(response)
+            await ctx.send("No stocks found for this user")
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):

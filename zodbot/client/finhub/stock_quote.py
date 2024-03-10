@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from typing import Self
+from .client import ResponseDataAbstract
 
 
 @dataclass
-class StockQuote:
+class StockQuote(ResponseDataAbstract):
     current_price: float
     change: float
     change_percent: float

@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from typing import Self
+from .client import ResponseDataAbstract
 
 
 @dataclass
-class StockInfo:
+class StockInfo(ResponseDataAbstract):
     country: str
     currency: str
     exchange: str
