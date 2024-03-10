@@ -9,11 +9,12 @@ from zodbot import utils
 from zodbot.cache import Cache
 from zodbot.client import finhub
 from zodbot.db import db
+from zodbot.config import config
 
 class Stocks(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self._cache = Cache(tempfile.gettempdir() + "/cache", "stocks-v2.json", 60)
+        self._cache = Cache(config.cache_folder, "stocks-v2.json", 60)
 
         if not db.check_if_db_exists():
             db.create_table()

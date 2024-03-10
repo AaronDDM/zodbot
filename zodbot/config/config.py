@@ -7,7 +7,7 @@ load_dotenv()
 class Config():
     discord_token: str = ""
     finnhub_token: str = ""
-    firebase_service_account_key: str = ""
+    cache_folder: str = ""
     watch_file: str = ""
 
     def __init__(self):
@@ -16,6 +16,6 @@ class Config():
     def _load(self):
         self.discord_token = cast(str, os.environ.get('DISCORD_TOKEN', ''))
         self.finnhub_token = cast(str, os.environ.get('FINNHUB_API_KEY', ''))
-        self.firebase_service_account_key = cast(str, os.environ.get('FIREBASE_SERVICE_ACCOUNT_KEY', ''))
-        self.watch_file = cast(str, os.environ.get('WATCH_FILE', ''))
+        self.cache_folder = cast(str, os.environ.get('CACHE_FOLDER', ''))
+        self.db_file = cast(str, os.environ.get('DB_FILE', ''))
         

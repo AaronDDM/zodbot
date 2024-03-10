@@ -1,5 +1,6 @@
 import sqlite3
 from typing import Optional
+from zodbot.config import config
 
 class Transaction:
     def __init__(self, uid:str, symbol:str, action: str, shares: int, price: float):
@@ -149,4 +150,4 @@ class Database:
             
             return portfolios
 
-db = Database("zodbot.db")
+db = Database(config.db_file)

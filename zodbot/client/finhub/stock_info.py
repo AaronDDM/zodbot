@@ -17,21 +17,20 @@ class StockInfo:
     logo: str
     finnhub_industry: str
     
-    @classmethod
-    def asdict(cls, data) -> dict:
+    def asdict(cls) -> dict:
         return {
-            "country": data.country,
-            "currency": data.currency,
-            "exchange": data.exchange,
-            "ipo": data.ipo,
-            "marketCapitalization": data.market_capitalization,
-            "name": data.name,
-            "phone": data.phone,
-            "shareOutstanding": data.share_outstanding,
-            "ticker": data.ticker,
-            "weburl": data.weburl,
-            "logo": data.logo,
-            "finnhubIndustry": data.finnhub_industry,
+            "country": cls.country,
+            "currency": cls.currency,
+            "exchange": cls.exchange,
+            "ipo": cls.ipo,
+            "marketCapitalization": cls.market_capitalization,
+            "name": cls.name,
+            "phone": cls.phone,
+            "shareOutstanding": cls.share_outstanding,
+            "ticker": cls.ticker,
+            "weburl": cls.weburl,
+            "logo": cls.logo,
+            "finnhubIndustry": cls.finnhub_industry,
         }
 
     @classmethod

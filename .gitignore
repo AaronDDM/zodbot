@@ -7,3 +7,5 @@ zodbot.spec
 .upload
 zodbot-*.json
 .env
+cache
+*.db

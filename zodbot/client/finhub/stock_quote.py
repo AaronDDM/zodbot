@@ -12,16 +12,15 @@ class StockQuote:
     open: float
     previous_close: float
 
-    @classmethod
-    def asdict(cls, data) -> dict:
+    def asdict(cls) -> dict:
         return {
-            "c": data.current_price,
-            "d": data.change,
-            "dp": data.change_percent,
-            "h": data.high,
-            "l": data.low,
-            "o": data.open,
-            "pc": data.previous_close,
+            "c": cls.current_price,
+            "d": cls.change,
+            "dp": cls.change_percent,
+            "h": cls.high,
+            "l": cls.low,
+            "o": cls.open,
+            "pc": cls.previous_close,
         }
 
     @classmethod

@@ -24,8 +24,6 @@ To build for a linux (amd 64) machine, run `make build-linux` (uses docker)
 
 `FINNHUB_API_KEY`: The API KEY for your FinHub account.
 
-`FIREBASE_SERVICE_ACCOUNT_KEY`: Path to your firebase service account crendtials.
-
 ## Usage
 
 Running for development, run: `poetry run python3 zodbot/main.py`

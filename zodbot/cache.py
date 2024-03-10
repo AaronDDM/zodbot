@@ -37,7 +37,7 @@ class Cache():
 
     def set(self, key, value):
         if dataclasses.is_dataclass(value):
-            v = dataclasses.asdict(value)
+            v = value.asdict()
         else:
             v = value
 
