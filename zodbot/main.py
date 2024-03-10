@@ -17,13 +17,14 @@ async def on_ready():
   await bot.tree.sync()
 
 @bot.tree.command(name="buy", description="Buy a stock")
-async def buy(interaction: discord.Interaction, symbol: str, shares: int, purchase_price: float):    
-    user_id = interaction.user.id
-    success, response = await stocks_cog.buy(user_id, symbol, shares, purchase_price)
-    await interaction.response.send_message(response)
+async def buy(group: discord.app_commands.commands.Group, interaction: discord.Interaction, *args, **kwargs):    
+  symbol, shares, purchase_price = args
+  user_id = interaction.user.id
+  success, response = await stocks_cog.buy(user_id, symbol, shares, purchase_price)
+  await interaction.response.send_message(response)
 
 @bot.tree.command(name="portfolio", description="View your portfolio")
-async def portfolio(interaction: discord.Interaction):
+async def portfolio(group: discord.app_commands.commands.Group, interaction: discord.Interaction, *args, **kwargs):
     user = interaction.user
     success, response = await stocks_cog.portfolio(user)
     if success:
