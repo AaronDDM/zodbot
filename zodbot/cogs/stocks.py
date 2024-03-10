@@ -11,12 +11,13 @@ from zodbot.client import finhub
 from zodbot.db import db
 
 class Stocks(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
         self._cache = Cache(tempfile.gettempdir() + "/cache", "stocks-v2.json", 60)
 
         if not db.check_if_db_exists():
             db.create_table()
+
 
     async def get_stock_info(self, symbol: str):
         # Check if the stock information is in the cache
@@ -44,8 +45,8 @@ class Stocks(commands.Cog):
         stock_price = await finhub.get(finhub.StockQuote, "https://finnhub.io/api/v1/quote?symbol={}".format(symbol))
         return stock_price
     
-    @commands.hybrid_command()
-    async def add(self, ctx: commands.Context, symbol: str, shares: int, purchase_price: float):
+    @commands.command()
+    async def buy(self, ctx: commands.Context, symbol: str, shares: int, purchase_price: float):
         # Check if the stock information is in the cache
         stock_info = await self.get_stock_info(symbol)
         if stock_info is None:
@@ -68,7 +69,7 @@ class Stocks(commands.Cog):
 
         await ctx.send("Added stock to your portfolio")
     
-    @commands.hybrid_command()
+    @commands.command()
     async def portfolio(self, ctx: commands.Context, *, member: discord.Member | None = None):
         user = member or ctx.author
 

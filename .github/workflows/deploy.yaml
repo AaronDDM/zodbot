@@ -1,0 +1,37 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build
+        run: make build
+      - name: Create SSH key
+        run: |
+            mkdir -p ~/.ssh/
+            echo "$SSH_PRIVATE_KEY" > ../private.key
+            sudo chmod 600 ../private.key
+            echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+        shell: bash
+        env:
+            SSH_PRIVATE_KEY: ${{secrets.SSH_DEPLOY_KEY}}
+            SSH_KNOWN_HOSTS: ${{secrets.SSH_KNOWN_HOSTS}}
+            SSH_KEY_PATH: ${{ github.workspace }}/../private.key
+      - name: Deploy
+        run: |
+            scp -i $SSH_KEY_PATH -r ./dist/* ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}}:${{secrets.SSH_PATH}}
+            ssh ubuntu@vps-555c353f.vps.ovh.ca 'cd ${{secrets.SSH_PATH}} && mv zodbox_linux_uploaded zodbox_linux && systemctl restart zodbot'
+        env:
+            SSH_USER: ${{secrets.SSH_USER}}
+            SSH_HOST: ${{secrets.SSH_HOST}}
+            SSH_PATH: ${{secrets.SSH_PATH}}
+            SSH_KEY_PATH: ${{ github.workspace }}/../private.key
+         

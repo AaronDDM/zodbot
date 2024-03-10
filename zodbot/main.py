@@ -1,5 +1,5 @@
 import discord
-from zodbot.cogs import stocks
+from zodbot.cogs.stocks import Stocks
 from discord.ext import commands 
 from zodbot.config import config
 
@@ -12,11 +12,13 @@ description = '''A personal zodbot.'''
 
 bot = commands.Bot(command_prefix='!', description=description, intents=intents)
 
+stocks_cog = Stocks(bot)
+
 @bot.event
 async def on_ready():
   print(f'We have logged in as {bot.user}')
-  await bot.add_cog(stocks.Stocks(bot))
-
+  await bot.add_cog(stocks_cog)
+  await bot.tree.sync()
 
 if config.discord_token is None:
   print("Token is not set")
