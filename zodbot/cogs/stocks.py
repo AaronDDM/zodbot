@@ -4,12 +4,13 @@ from datetime import datetime
 
 import discord
 from discord.ext import commands
-from zodbot import utils
 
+from zodbot import utils
 from zodbot.cache import Cache
 from zodbot.client import finhub
-from zodbot.db import db
 from zodbot.config import config
+from zodbot.db import db
+
 
 class Stocks(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -46,38 +47,34 @@ class Stocks(commands.Cog):
         stock_price = await finhub.get(finhub.StockQuote, "https://finnhub.io/api/v1/quote?symbol={}".format(symbol))
         return stock_price
     
-    @commands.command()
-    async def buy(self, ctx: commands.Context, symbol: str, shares: int, purchase_price: float):
+    async def buy(self, user_id: int, symbol: str, shares: int, purchase_price: float):
+        # Check if the user already has this stock in the database
+        if db.get_user_stock(user_id, symbol):
+            return False, "You already have this stock in your portfolio"
+
         # Check if the stock information is in the cache
         stock_info = await self.get_stock_info(symbol)
         if stock_info is None:
-            await ctx.send("No stock found")
-            return
+            return False, "No stock found"
 
         # Check if the stock price information is in the cache
         stock_price_info = await self.get_daily_price_info(symbol, cache=True)
         if stock_price_info is None:
-            await ctx.send("No stock price found")
-            return
+            return False, "No stock price found"
 
         # Check if the user already has stocks in the database
-        if db.get_user_stock(ctx.author.id, symbol):
-            await ctx.send("You already have this stock in your portfolio")
-            return
+        if db.get_user_stock(user_id, symbol):
+            return False, "You already have this stock in your portfolio"
 
         # Add the stock to the user's stocks
-        db.add_transaction(ctx.author.id, symbol, 'BUY', shares, purchase_price)
+        db.add_transaction(user_id, symbol, 'BUY', shares, purchase_price)
 
-        await ctx.send("Added stock to your portfolio")
-    
-    @commands.command()
-    async def portfolio(self, ctx: commands.Context, *, member: discord.Member | None = None):
-        user = member or ctx.author
+        return True, "Added stock to your portfolio"
 
+    async def portfolio(self, user: discord.Member | discord.User):
         user_stocks = db.get_user_portfolio(user.id)
         if not user_stocks:
-            await ctx.send("No stocks found for this user")
-            return
+            return False, "No stocks found for this user"
 
         # Create the embed
         embed = discord.Embed(title="Stocks for {}".format(user.name),
@@ -109,8 +106,21 @@ class Stocks(commands.Cog):
                 inline=False
             )
 
-        await ctx.send(embed=embed)
+        return True, embed
 
+    @commands.command(name="buy")
+    async def buy_command(self, ctx: commands.Context, symbol: str, shares: int, purchase_price: float):
+        success, message = await self.buy(ctx.author.id, symbol, shares, purchase_price)
+        await ctx.send(message)
+    
+    @commands.command(name="portfolio")
+    async def portfolio_command(self, ctx: commands.Context, *, member: discord.Member | None = None):
+        user = member or ctx.author
+        success, response = await self.portfolio(user)
+        if success:
+            await ctx.send(embed=response)
+        else:
+            await ctx.send(response)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):

@@ -14,9 +14,7 @@ class ResponseDataAbstract(Protocol):
     def from_dict(cls, data: Dict) -> Self:
         pass
 
-    @classmethod
-    @abstractmethod
-    def asdict(cls, self) -> Dict:
+    def asdict(cls) -> Dict:
         pass
 
 T = TypeVar('T', bound=ResponseDataAbstract)
@@ -24,7 +22,7 @@ T = TypeVar('T', bound=ResponseDataAbstract)
 class ResponseData(Generic[T]):
     pass
     
-async def get(cls: Type[T], url: str) -> Optional[T]:
+async def get(cls: type[T], url: str) -> Optional[T]:
     # Make the request
     request = requests.get(url, headers={"X-Finnhub-Token": config.finnhub_token})
 
