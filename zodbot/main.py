@@ -19,17 +19,17 @@ async def on_ready():
 @bot.tree.command(name="buy", description="Buy a stock")
 async def buy(interaction: discord.Interaction, symbol: str, shares: int, purchase_price: float):    
     user_id = interaction.user.id
-    success, message = await stocks_cog.buy(user_id, symbol, shares, purchase_price)
-    await interaction.response.send_message(message)
+    success, response = await stocks_cog.buy(user_id, symbol, shares, purchase_price)
+    await interaction.response.send_message(response)
 
 @bot.tree.command(name="portfolio", description="View your portfolio")
 async def portfolio(interaction: discord.Interaction):
     user = interaction.user
-    success, message = await stocks_cog.portfolio(user)
+    success, response = await stocks_cog.portfolio(user)
     if success:
-        await interaction.response.send_message(embed=message)
+        await interaction.response.send_message(embed=response)
     else:
-        await interaction.response.send_message(message)
+        await interaction.response.send_message(response)
 
 if config.discord_token is None:
   print("Token is not set")
