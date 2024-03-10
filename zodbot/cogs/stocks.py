@@ -62,10 +62,6 @@ class Stocks(commands.Cog):
         if stock_price_info is None:
             return False, "No stock price found"
 
-        # Check if the user already has stocks in the database
-        if db.get_user_stock(user_id, symbol):
-            return False, "You already have this stock in your portfolio"
-
         # Add the stock to the user's stocks
         db.add_transaction(user_id, symbol, 'BUY', shares, purchase_price)
 
