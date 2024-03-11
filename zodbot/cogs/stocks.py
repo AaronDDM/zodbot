@@ -67,17 +67,13 @@ class Stocks(commands.Cog):
 
         return "Added stock to your portfolio", None
 
-    async def portfolio(self, user: discord.Member | discord.User) -> tuple[discord.Embed, None] | tuple[None, str]:
+    async def portfolio(self, user: discord.Member | discord.User) -> tuple[list[discord.Embed], None] | tuple[None, str]:
         user_stocks = db.get_user_portfolio(user.id)
         if not user_stocks:
             return None, "No stocks found for this user"
 
         # Create the embed
-        embed = discord.Embed(title="Stocks for {}".format(user.name),
-                              description="",
-                              colour=discord.Color.blue(),
-                              timestamp=datetime.now())
-
+        embeds = []
         for stock in user_stocks:
             stock_info = await self.get_stock_info(stock.symbol)
             if stock_info is None:
@@ -88,21 +84,29 @@ class Stocks(commands.Cog):
                 continue
 
             # Add the stock to the embed
-            embed.add_field(
-                name="{} (${})".format(stock_info.name, stock_price_info.current_price),
-                value="""
-                    Purchased at: ${}\n
-                    Shares: {}\n
-                    Total value: ${}
-                    """.format(
-                        str(stock.weighted_average).format("0.2f"),
-                        stock.shares, 
-                        str(stock.value).format("0.2f")
-                    ),
-                inline=False
-            )
+            embed = discord.Embed(title="{} (${})".format(stock_info.name, stock_price_info.current_price),
+                              description="",
+                              colour=discord.Color.blue(),
+                              timestamp=datetime.now())
 
-        return embed, None
+            embed.add_field(
+                name="Purchased at",
+                value=str(stock.weighted_average).format("0.2f")
+            )
+            
+            embed.add_field(
+                name"Shares",
+                value=stock.shares,
+            )
+            
+            embed.add_field(
+                name="Total value",
+                value=str(stock.value).format("0.2f"),
+            )
+            
+            embeds.append(embed)
+
+        return embeds, None
 
     @commands.command(name="buy")
     async def buy_command(self, ctx: commands.Context, symbol: str, shares: int = 100, purchase_price: float | None = None):
