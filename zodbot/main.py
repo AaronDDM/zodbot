@@ -17,7 +17,7 @@ async def on_ready():
   await bot.tree.sync()
 
 @bot.tree.command(name="buy", description="Buy a stock")  # type: ignore
-async def buy(interaction: discord.Interaction, symbol: str, shares: int, purchase_price: float):    
+async def buy(interaction: discord.Interaction, symbol: str, shares: int = 100, purchase_price: float | None = None):    
   user_id = interaction.user.id
   message, error = await stocks_cog.buy(user_id, symbol, shares, purchase_price)
   if error:
@@ -31,7 +31,7 @@ async def portfolio(interaction: discord.Interaction):
   embed, error = await stocks_cog.portfolio(user)
   if error:
     await interaction.response.send_message(error)
-  else:
+  elif embed is not None:
     await interaction.response.send_message(embed=embed)
 
 if config.discord_token is None:
