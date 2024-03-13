@@ -85,7 +85,9 @@ class Stocks(commands.Cog):
             
             # Get the percentage change
             change = stock_price_info.current_price - stock.weighted_average
-            colour = discord.Color.red() if change < 0 else discord.Color.green()
+            
+            # Get the color based on the change, red if negative, green if positive, grey if 0
+            colour = discord.Color.red() if change < 0 else discord.Color.green() if change > 0 else discord.Color.grey()
 
             # Add the stock to the embed
             embed = discord.Embed(
@@ -152,10 +154,11 @@ class Stocks(commands.Cog):
 
             # Create the embed
             embed = discord.Embed(
-                    title="${} {} {}%".format(stock_price_info.current_price, 'up' if stock_price_info.change_percent > 0 else 'down', round(stock_price_info.change_percent, 3)),
-                      description="**Symbol**: {}\n**Market Cap**: {}".format(stock_symbol.capitalize(), utils.human_format(stock_info.market_capitalization)),
-                      colour=color,
-                      timestamp=datetime.now())
+                title="${} {} {}%".format(stock_price_info.current_price, 'up' if stock_price_info.change_percent > 0 else 'down', round(stock_price_info.change_percent, 3)),
+                description="**Symbol**: {}\n**Market Cap**: {}".format(stock_symbol.capitalize(), utils.human_format(stock_info.market_capitalization)),
+                colour=color,
+                timestamp=datetime.now()
+            )
 
             embed.set_author(name="{}".format(stock_info.name))
 
