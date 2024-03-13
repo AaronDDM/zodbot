@@ -91,16 +91,16 @@ class Stocks(commands.Cog):
             embed = discord.Embed(title="{} (${})".format(stock_info.name, stock_price_info.current_price),
                               description="",
                               colour=colour,
-                              timestamp=datetime.fromtimestamp(stock.last_transaction_date))
+                              timestamp=stock.last_transaction_date)
 
             embed.add_field(
                 name="Purchased at",
-                value=str(stock.weighted_average).format("0.2f")
+                value="{:.2f}%".format(stock.weighted_average)
             )
             
             embed.add_field(
                 name="Change",
-                value=f"{str(change).format("0.2f")}%"
+                value="{:.2f}%".format(change)
             )
             
             embeds.append(embed)
