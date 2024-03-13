@@ -88,10 +88,12 @@ class Stocks(commands.Cog):
             colour = discord.Color.red() if change < 0 else discord.Color.green()
 
             # Add the stock to the embed
-            embed = discord.Embed(title="{} (${})".format(stock_info.name, stock_price_info.current_price),
-                              description="",
-                              colour=colour,
-                              timestamp=stock.last_transaction_date)
+            embed = discord.Embed(
+                title="{} (${})".format(stock_info.name, stock_price_info.current_price),
+                description="",
+                colour=colour,
+                timestamp=stock.last_transaction_date
+            )
 
             embed.add_field(
                 name="Purchased at",
@@ -149,7 +151,8 @@ class Stocks(commands.Cog):
             color = discord.Color.red() if stock_price_info.change < 0 else discord.Color.green()
 
             # Create the embed
-            embed = discord.Embed(title="${} {} {}%".format(stock_price_info.current_price, 'up' if stock_price_info.change_percent > 0 else 'down', round(stock_price_info.change_percent, 3)),
+            embed = discord.Embed(
+                    title="${} {} {}%".format(stock_price_info.current_price, 'up' if stock_price_info.change_percent > 0 else 'down', round(stock_price_info.change_percent, 3)),
                       description="**Symbol**: {}\n**Market Cap**: {}".format(stock_symbol.capitalize(), utils.human_format(stock_info.market_capitalization)),
                       colour=color,
                       timestamp=datetime.now())
