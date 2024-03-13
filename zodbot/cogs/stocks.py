@@ -87,7 +87,7 @@ class Stocks(commands.Cog):
             change = stock_price_info.current_price - stock.weighted_average
             
             # Get the color based on the change, red if negative, green if positive, grey if 0
-            colour = discord.Color.red() if change < 0 else discord.Color.green() if change > 0 else discord.Color.grey()
+            colour = discord.Color.red() if change < 0 else discord.Color.green() if change > 0 else discord.Color.light_grey()
 
             # Add the stock to the embed
             embed = discord.Embed(
