@@ -98,8 +98,8 @@ class Stocks(commands.Cog):
             )
 
             embed.add_field(
-                name="Purchased at",
-                value="{:.2f}%".format(stock.weighted_average)
+                name="Purchase Price",
+                value="${:.2f}".format(stock.weighted_average)
             )
             
             embed.add_field(
