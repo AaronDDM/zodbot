@@ -123,7 +123,7 @@ class Stocks(commands.Cog):
         if error:
             await ctx.send(error)
         elif embed is not None:
-            await ctx.send(embed=embed)
+            await ctx.send(embeds=embed)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):

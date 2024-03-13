@@ -28,11 +28,11 @@ async def buy(interaction: discord.Interaction, symbol: str, shares: int = 100, 
 @bot.tree.command(name="portfolio", description="View your portfolio") # type: ignore
 async def portfolio(interaction: discord.Interaction):
   user = interaction.user
-  embed, error = await stocks_cog.portfolio(user)
+  embeds, error = await stocks_cog.portfolio(user)
   if error:
     await interaction.response.send_message(error)
-  elif embed is not None:
-    await interaction.response.send_message(embed=embed)
+  elif embeds is not None:
+    await interaction.response.send_message(embeds=embeds)
 
 if config.discord_token is None:
   print("Token is not set")
