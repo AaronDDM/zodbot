@@ -95,7 +95,7 @@ class Stocks(commands.Cog):
             )
             
             embed.add_field(
-                name"Shares",
+                name="Shares",
                 value=stock.shares,
             )
             
