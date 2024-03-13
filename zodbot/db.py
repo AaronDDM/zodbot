@@ -12,11 +12,12 @@ class Transaction:
         self.added_on = None
 
 class Portfolio:
-    def __init__(self, uid:str, symbol:str, shares=0, value=0.0, weighted_average=0.0):
+    def __init__(self, uid:str, symbol:str, last_transaction_date: int, shares=0, value=0.0, weighted_average=0.0):
         self.uid = uid
         self.symbol = symbol
         self.shares = shares
         self.value = value
+        self.last_transaction_date = last_transaction_date
         self.weighted_average = weighted_average
 
 class Database:
@@ -62,7 +63,8 @@ class Database:
                 symbol, 
                 SUM(CASE WHEN action = 'BUY' THEN shares ELSE -shares END) AS shares, 
                 SUM(CASE WHEN action = 'BUY' THEN shares * price ELSE -shares * price END) AS value,
-                SUM(CASE WHEN action = 'BUY' THEN shares * price ELSE -shares * price END) / SUM(CASE WHEN action = 'BUY' THEN shares ELSE -shares END) AS weighted_average
+                SUM(CASE WHEN action = 'BUY' THEN shares * price ELSE -shares * price END) / SUM(CASE WHEN action = 'BUY' THEN shares ELSE -shares END) AS weighted_average,
+                MAX(added_on) AS last_transaction_date
             FROM 
                 {self.TABLES_NAMES['TRANSACTIONS']} 
             GROUP BY 
@@ -110,7 +112,8 @@ class Database:
                     symbol, 
                     SUM(CASE WHEN action = 'BUY' THEN shares ELSE -shares END) AS shares, 
                     SUM(CASE WHEN action = 'BUY' THEN shares * price ELSE -shares * price END) AS value,
-                    SUM(CASE WHEN action = 'BUY' THEN shares * price ELSE -shares * price END) / SUM(CASE WHEN action = 'BUY' THEN shares ELSE -shares END) AS weighted_average 
+                    SUM(CASE WHEN action = 'BUY' THEN shares * price ELSE -shares * price END) / SUM(CASE WHEN action = 'BUY' THEN shares ELSE -shares END) AS weighted_average,
+                    MAX(added_on) AS last_transaction_date
                 FROM 
                     {self.TABLES_NAMES['TRANSACTIONS']}  
                 WHERE 
@@ -133,7 +136,8 @@ class Database:
                     symbol, 
                     SUM(CASE WHEN action = 'BUY' THEN shares ELSE -shares END) AS shares, 
                     SUM(CASE WHEN action = 'BUY' THEN shares * price ELSE -shares * price END) AS value,
-                SUM(CASE WHEN action = 'BUY' THEN shares * price ELSE -shares * price END) / SUM(CASE WHEN action = 'BUY' THEN shares ELSE -shares END) AS weighted_average
+                    SUM(CASE WHEN action = 'BUY' THEN shares * price ELSE -shares * price END) / SUM(CASE WHEN action = 'BUY' THEN shares ELSE -shares END) AS weighted_average,
+                    MAX(added_on) AS last_transaction_date
                 FROM 
                     {self.TABLES_NAMES['TRANSACTIONS']}  
                 WHERE 
