@@ -1,4 +1,6 @@
 import unittest
+from freezegun import freeze_time
+from datetime import datetime
 from .db import Database
 
 class DatabaseTest(unittest.TestCase):
@@ -12,6 +14,7 @@ class DatabaseTest(unittest.TestCase):
     def test_check_if_db_exists(self):
         self.assertTrue(self.db.check_if_db_exists())
 
+    @freeze_time("2021-01-01 12:00:00")
     def test_add_transaction(self):
         self.db.add_transaction("user1", "AAPL", "BUY", 10, 150.0)
         self.db.add_transaction("user1", "AAPL", "SELL", 5, 160.0)
@@ -19,6 +22,7 @@ class DatabaseTest(unittest.TestCase):
         self.assertEqual(len(self.db.get_user_transactions("user1")), 2)
         self.assertEqual(len(self.db.get_user_transactions("user2")), 1)
 
+    @freeze_time("2021-01-01 12:00:00")
     def test_get_all_portfolio(self):
         self.db.add_transaction("user1", "AAPL", "BUY", 10, 150.0)
         self.db.add_transaction("user1", "AAPL", "SELL", 5, 160.0)
@@ -33,7 +37,9 @@ class DatabaseTest(unittest.TestCase):
         self.assertEqual(portfolio[1].shares, 8)
         self.assertEqual(portfolio[1].value, 9600.0)
         self.assertEqual(portfolio[1].weighted_average, 1200.0)
+        self.assertEqual(portfolio[0].last_transaction_date, datetime(2021, 1, 1, 12, 0, 0))
 
+    @freeze_time("2021-01-01 12:00:00")
     def test_get_user_transactions(self):
         self.db.add_transaction("user1", "AAPL", "BUY", 10, 150.0)
         self.db.add_transaction("user1", "AAPL", "SELL", 5, 160.0)

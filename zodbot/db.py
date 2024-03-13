@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime
 from typing import Optional
 from zodbot.config import config
 
@@ -12,7 +13,7 @@ class Transaction:
         self.added_on = None
 
 class Portfolio:
-    def __init__(self, uid:str, symbol:str, last_transaction_date: int, shares=0, value=0.0, weighted_average=0.0):
+    def __init__(self, uid:str, symbol:str, last_transaction_date: datetime, shares=0, value=0.0, weighted_average=0.0):
         self.uid = uid
         self.symbol = symbol
         self.shares = shares
@@ -27,6 +28,7 @@ class Database:
 
     def __init__(self, db_name):
         self.con = sqlite3.connect(db_name)
+        self.con.row_factory = sqlite3.Row
 
     def check_if_db_exists(self):
         with self.con:
@@ -42,7 +44,7 @@ class Database:
                     symbol TEXT,
                     action TEXT CHECK(action IN ('BUY', 'SELL')),
                     shares INTEGER,
-                    price REAL
+                    price REAL,
                     added_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
@@ -53,7 +55,7 @@ class Database:
 
     def add_transaction(self, uid, symbol, action, shares, price):
         with self.con:
-            self.con.execute(f"INSERT INTO {self.TABLES_NAMES['TRANSACTIONS']} (uid, symbol, action, shares, price) VALUES (?, ?, ?, ?, ?)", (uid, symbol, action, shares, price))
+            self.con.execute(f"INSERT INTO {self.TABLES_NAMES['TRANSACTIONS']} (uid, symbol, action, shares, price, added_on) VALUES (?, ?, ?, ?, ?, ?)", (uid, symbol, action, shares, price, datetime.now().isoformat()))
 
     def get_all_portfolio(self) -> list[Portfolio]:
         with self.con:
@@ -61,10 +63,10 @@ class Database:
             SELECT 
                 uid,
                 symbol, 
+                MAX(added_on) AS last_transaction_date,
                 SUM(CASE WHEN action = 'BUY' THEN shares ELSE -shares END) AS shares, 
                 SUM(CASE WHEN action = 'BUY' THEN shares * price ELSE -shares * price END) AS value,
-                SUM(CASE WHEN action = 'BUY' THEN shares * price ELSE -shares * price END) / SUM(CASE WHEN action = 'BUY' THEN shares ELSE -shares END) AS weighted_average,
-                MAX(added_on) AS last_transaction_date
+                SUM(CASE WHEN action = 'BUY' THEN shares * price ELSE -shares * price END) / SUM(CASE WHEN action = 'BUY' THEN shares ELSE -shares END) AS weighted_average
             FROM 
                 {self.TABLES_NAMES['TRANSACTIONS']} 
             GROUP BY 
@@ -75,7 +77,7 @@ class Database:
 
             portfolios = []
             for result in results:
-                portfolio = Portfolio(result[0], result[1], result[2], result[3], result[4])
+                portfolio = Portfolio(result['uid'], result['symbol'], datetime.fromisoformat(result['last_transaction_date']), result['shares'], result['value'], result['weighted_average'])
                 portfolios.append(portfolio)
             
             return portfolios
@@ -99,7 +101,7 @@ class Database:
 
             transactions = []
             for result in results:
-                transaction = Transaction(result[0], result[1], result[2], result[3], result[4])
+                transaction = Transaction(result['uid'], result['symbol'], result['action'], result['shares'], result['price'])
                 transactions.append(transaction)
 
             return transactions
@@ -109,11 +111,11 @@ class Database:
             cur = self.con.execute(f"""
                 SELECT 
                     uid, 
-                    symbol, 
+                    symbol,
+                    MAX(added_on) AS last_transaction_date, 
                     SUM(CASE WHEN action = 'BUY' THEN shares ELSE -shares END) AS shares, 
                     SUM(CASE WHEN action = 'BUY' THEN shares * price ELSE -shares * price END) AS value,
-                    SUM(CASE WHEN action = 'BUY' THEN shares * price ELSE -shares * price END) / SUM(CASE WHEN action = 'BUY' THEN shares ELSE -shares END) AS weighted_average,
-                    MAX(added_on) AS last_transaction_date
+                    SUM(CASE WHEN action = 'BUY' THEN shares * price ELSE -shares * price END) / SUM(CASE WHEN action = 'BUY' THEN shares ELSE -shares END) AS weighted_average
                 FROM 
                     {self.TABLES_NAMES['TRANSACTIONS']}  
                 WHERE 
@@ -124,7 +126,7 @@ class Database:
             result = cur.fetchone()
             if result is None:
                 return None
-            return Portfolio(result[0], result[1], result[2], result[3], result[4])
+            return Portfolio(result['uid'], result['symbol'], datetime.fromisoformat(result['last_transaction_date']), result['shares'], result['value'], result['weighted_average'])
 
     # User's portfolio is the sum of all the transactions
     # where the action is "BUY" minus the sum of all the
@@ -133,11 +135,11 @@ class Database:
         with self.con:
             cur = self.con.execute(f"""
                 SELECT 
-                    symbol, 
+                    symbol,
+                    MAX(added_on) AS last_transaction_date, 
                     SUM(CASE WHEN action = 'BUY' THEN shares ELSE -shares END) AS shares, 
                     SUM(CASE WHEN action = 'BUY' THEN shares * price ELSE -shares * price END) AS value,
-                    SUM(CASE WHEN action = 'BUY' THEN shares * price ELSE -shares * price END) / SUM(CASE WHEN action = 'BUY' THEN shares ELSE -shares END) AS weighted_average,
-                    MAX(added_on) AS last_transaction_date
+                    SUM(CASE WHEN action = 'BUY' THEN shares * price ELSE -shares * price END) / SUM(CASE WHEN action = 'BUY' THEN shares ELSE -shares END) AS weighted_average
                 FROM 
                     {self.TABLES_NAMES['TRANSACTIONS']}  
                 WHERE 
@@ -149,7 +151,7 @@ class Database:
 
             portfolios = []
             for res in result:
-                portfolio = Portfolio(uid, res[0], res[1], res[2], res[3])
+                portfolio = Portfolio(uid, res['symbol'], datetime.fromisoformat(res['last_transaction_date']), res['shares'], res['value'], res['weighted_average'])
                 portfolios.append(portfolio)
             
             return portfolios

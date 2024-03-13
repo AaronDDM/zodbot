@@ -12,6 +12,7 @@ requests = "^2.31.0"
 pyinstaller = "^6.4.0"
 firebase-admin = "^6.4.0"
 python-dotenv = "^1.0.1"
+freezegun = "^1.4.0"
 
 [tool.poetry.scripts]
 build = "zodbot.pyinstaller:install"
