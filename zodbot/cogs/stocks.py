@@ -82,11 +82,15 @@ class Stocks(commands.Cog):
             stock_price_info = await self.get_daily_price_info(stock.symbol, cache=True)
             if stock_price_info is None:
                 continue
+            
+            # Get the percentage change
+            change = stock_price_info.current_price - stock.weighted_average
+            colour = discord.Color.red() if change < 0 else discord.Color.green()
 
             # Add the stock to the embed
             embed = discord.Embed(title="{} (${})".format(stock_info.name, stock_price_info.current_price),
                               description="",
-                              colour=discord.Color.blue(),
+                              colour=colour,
                               timestamp=datetime.now())
 
             embed.add_field(
@@ -100,8 +104,8 @@ class Stocks(commands.Cog):
             )
             
             embed.add_field(
-                name="Total value",
-                value=str(stock.value).format("0.2f"),
+                name="Change",
+                value=f"{str(change).format("0.2f")}%"
             )
             
             embeds.append(embed)
