@@ -155,7 +155,7 @@ class Stocks(commands.Cog):
             # Create the embed
             embed = discord.Embed(
                 title="${} {} {}%".format(stock_price_info.current_price, 'up' if stock_price_info.change_percent > 0 else 'down', round(stock_price_info.change_percent, 3)),
-                description="**Symbol**: {}\n**Market Cap**: {}".format(stock_symbol.capitalize(), utils.human_format(stock_info.market_capitalization)),
+                description="**Symbol**: {}\n**Market Cap**: {}".format(stock_symbol.upper(), utils.human_format(stock_info.market_capitalization * 1000000)),
                 colour=color,
                 timestamp=datetime.now()
             )
