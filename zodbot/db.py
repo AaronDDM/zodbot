@@ -23,7 +23,8 @@ class Portfolio:
 
 class Database:
     TABLES_NAMES = {
-        "TRANSACTIONS": "transactions"
+        "TRANSACTIONS": "transactions",
+        "MESSAGES": "messages"
     }
 
     def __init__(self, db_name):
@@ -34,6 +35,18 @@ class Database:
         with self.con:
             cur = self.con.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{self.TABLES_NAMES['TRANSACTIONS']}'")
             return cur.fetchone() is not None
+    
+    def migration(self, version):
+        if version == 2:
+            with self.con:
+                self.con.execute(f"""
+                    CREATE TABLE IF NOT EXISTS {self.TABLES_NAMES['MESSAGES']} (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        uid TEXT,
+                        message TEXT,
+                        added_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+                """)
 
     def create_table(self):
         with self.con:
@@ -49,9 +62,41 @@ class Database:
                 );
             """)
 
+            self.con.execute(f"""
+                CREATE TABLE IF NOT EXISTS {self.TABLES_NAMES['MESSAGES']} (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    uid TEXT,
+                    message TEXT,
+                    added_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+
     def drop_table(self):
         with self.con:
             self.con.execute(f"DROP TABLE IF EXISTS {self.TABLES_NAMES['TRANSACTIONS']}")
+
+    def get_messages_by_ids(self, ids: list[int]):
+        with self.con:
+            cur = self.con.execute(f"SELECT * FROM {self.TABLES_NAMES['MESSAGES']} WHERE id IN ({ ','.join(['?']*len(ids)) })", ids)
+
+            results = cur.fetchall()
+            messages = []
+
+            # Order the results by the order of the ids
+            for id in ids:
+                for result in results:
+                    if result['id'] == id:
+                        messages.append(result)
+                        break
+            
+            return messages
+
+    def add_message(self, uid, message):
+        with self.con:
+            self.con.execute(f"INSERT INTO {self.TABLES_NAMES['MESSAGES']} (uid, message) VALUES (?, ?)", (uid, message))
+
+            # Return the last row id
+            return self.con.execute("SELECT last_insert_rowid()").fetchone()[0]
 
     def add_transaction(self, uid, symbol, action, shares, price):
         with self.con:

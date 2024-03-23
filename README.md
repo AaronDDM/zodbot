@@ -7,6 +7,7 @@ configuration is around getting it running as a service on a linux machine.
 - Python 3.12
 - Poetry
 - Docker
+- `brew install mecab`
 
 ## Getting started
 

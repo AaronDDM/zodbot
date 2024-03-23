@@ -9,3 +9,4 @@ zodbot-*.json
 .env
 cache
 *.db
+volumes

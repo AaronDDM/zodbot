@@ -6,13 +6,17 @@ authors = ["Aaron"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "<3.13,>=3.8"
+python = ">=3.9,<3.13"
 discord = "^2.3.2"
 requests = "^2.31.0"
 pyinstaller = "^6.4.0"
-firebase-admin = "^6.4.0"
 python-dotenv = "^1.0.1"
 freezegun = "^1.4.0"
+pandas = "^2.2.1"
+tokenizer = "^3.4.3"
+transformers = "^4.38.2"
+sentence-transformers = "^2.5.1"
+pymilvus = {version = "^2.4.0", extras = ["model"]}
 
 [tool.poetry.scripts]
 build = "zodbot.pyinstaller:install"
